@@ -260,3 +260,77 @@ La infraestructura mínima para la parcial 1 incluye:
 - Crear `.env.local` y `.gitignore` correspondiente para el proyecto.
 
 El objetivo de Compose en esta etapa es demostrar el stack API + PostgreSQL + Redis + worker stub corriendo en contenedores, tal como exige el enunciado.
+
+## 11. Guía de colaboración y zonas de trabajo
+
+Para reducir confusiones y conflictos en el código, cada integrante tiene una zona principal de trabajo en el repositorio. La idea es que la mayoría de los cambios vivan en esas carpetas y que los archivos compartidos se modifiquen solo cuando sea necesario.
+
+### 11.1 Zonas principales por persona
+
+| Persona   | Responsabilidad principal                          | Carpetas donde deben trabajar principalmente                                    |
+|----------|-----------------------------------------------------|--------------------------------------------------------------------------------|
+| Carlos   | Infraestructura y arquitectura                      | `infra/`, `apps/api/src/infrastructure/`, `apps/api/src/presentation/modules/*` (solo estructura base), `apps/worker/`, `1-documentation/` |
+| Darlen   | Dominio y seguridad                                 | `apps/api/src/domain/` (entidades relacionadas con usuarios/roles), `apps/api/src/application/*` (casos de uso de auth/usuarios), `apps/api/src/infrastructure/security/`, `apps/api/src/presentation/modules/auth/`, `apps/api/src/presentation/modules/users/` |
+| Kevin C  | Gestión académica y documentación de API            | `apps/api/src/presentation/modules/courses/`, casos de uso y repos de cursos en `application/` y `domain/`, `1-documentation/api/` o sección de endpoints en la documentación de la API |
+| Sebastian| Gestión de retos y esquemas                         | `apps/api/src/presentation/modules/challenges/`, `apps/api/src/presentation/modules/schemas/`, entidades, casos de uso y repositorios de retos/esquemas en `domain/` y `application/` |
+| Kevin R  | Automatización, datos de prueba y worker SQL (stub) | `apps/worker/`, `apps/api/src/infrastructure/queue/`, generación de datos de prueba (scripts o módulos específicos), apoyo a Sebastian para compatibilidad de esquemas/datos |
+
+Estas zonas no son exclusivas (a veces será necesario tocar algo fuera), pero sirven como guía para que cada persona tenga claro “de quién es cada carpeta”.
+
+### 11.2 Archivos que requieren coordinación
+
+Hay archivos que afectan a todo el equipo y se consideran de coordinación. Antes de modificarlos, se recomienda avisar por el canal del equipo o abrir un issue:
+
+- `apps/api/src/app.module.ts`
+- `apps/api/package.json`
+- `apps/worker/package.json`
+- `infra/docker-compose.yml`
+- `.env.example`
+- `README.md` (raíz del proyecto)
+- `1-documentation/README.md`
+
+Regla simple: si un cambio afecta a más de un módulo (por ejemplo, añadir un nuevo servicio global, cambiar el nombre de un contenedor, modificar variables de entorno), se coordina primero.
+
+### 11.3 Reglas de trabajo por carpetas
+
+- **Módulos de presentación (`apps/api/src/presentation/modules/*`)**  
+  Cada módulo tiene un responsable principal:
+  - `auth/` y `users/`: Darlen  
+  - `courses/`: Kevin C  
+  - `challenges/` y `schemas/`: Sebastian  
+  - `submissions/`: se puede trabajar en conjunto, pero cualquier cambio importante se coordina con Carlos y Kevin R.
+
+- **Dominio y casos de uso (`domain/` y `application/`)**  
+  Cada quien crea o modifica entidades y casos de uso relacionados con su módulo, respetando nombres y patrones existentes. Si es necesario cambiar algo que afecta a varios módulos, se discute antes.
+
+- **Infraestructura (`infrastructure/`)**  
+  Cambios en `config/`, `database/`, `queue/` y `security/` deben hacerse de manera controlada porque impactan a toda la API. Carlos prepara la estructura base; después cada responsable puede agregar lo necesario dentro de su contexto, avisando cuando se cambian cosas compartidas.
+
+- **Worker (`apps/worker/`)**  
+  Principalmente a cargo de Kevin R. Si alguien necesita que el worker soporte nuevos campos o tipos de datos, lo discute con él antes de hacer cambios.
+
+### 11.4 Flujo de trabajo Git recomendado
+
+Para evitar conflictos de merge:
+
+1. Cada persona trabaja en una rama propia por feature, por ejemplo:  
+   - `feature/auth-jwt-darlen`  
+   - `feature/courses-crud-kevinc`  
+   - `feature/challenges-crud-sebastian`  
+   - `feature/worker-stub-kevinr`  
+   - `feature/infra-architecture-carlos`
+
+2. Antes de empezar una tarea, actualizar desde `main`:
+   - `git checkout main`
+   - `git pull`
+   - `git checkout <tu-rama>`
+   - `git merge main`
+
+3. Hacer commits pequeños y frecuentes, centrados en una sola cosa.
+
+4. Cuando se termine una tarea, abrir un Pull Request indicando:
+   - Qué módulo se tocó.
+   - Qué carpetas se modificaron.
+   - Si hubo cambios en archivos de coordinación.
+
+5. Evitar trabajar dos personas a la vez sobre el mismo archivo de coordinación sin hablarlo antes.
