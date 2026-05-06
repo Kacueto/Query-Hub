@@ -6,7 +6,7 @@ import { CreateSubmissionDto } from './dto/create-submission.dto';
 @Injectable()
 export class SubmissionsService {
   constructor(
-    @InjectQueue('sql-jobs') private queue: Queue,
+    @InjectQueue('sql-evaluation') private sqlQueue: Queue,
   ) {}
 
   async createSubmission(dto: CreateSubmissionDto) {
@@ -16,7 +16,7 @@ export class SubmissionsService {
       status: 'PENDING',
     };
 
-    await this.queue.add('execute-sql', {
+    await this.sqlQueue.add('execute-sql', {
       submissionId: submission.id,
       sql: dto.sql,
     });

@@ -18,7 +18,7 @@ import { EvaluationProcessor } from './evaluation.processor';
     }),
 
     BullModule.registerQueue({
-      name: 'sql-jobs',
+      name: 'sql-evaluation',
     }),
   ],
   providers: [EvaluationProcessor],
