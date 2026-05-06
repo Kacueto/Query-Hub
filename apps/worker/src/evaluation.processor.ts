@@ -1,16 +1,18 @@
 import { Process, Processor } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
-@Processor('sql-jobs')
+@Processor('sql-evaluation')
 export class EvaluationProcessor {
+  private readonly logger = new Logger(EvaluationProcessor.name);
 
   @Process('execute-sql')
   async handle(job: Job) {
-    console.log('Job recibido:', job.data);
+    this.logger.log('Job recibido: ' + JSON.stringify(job.data));
 
     // Simulación
     await new Promise(res => setTimeout(res, 2000));
 
-    console.log('SQL ejecutado');
+    this.logger.log('SQL ejecutado');
   }
 }

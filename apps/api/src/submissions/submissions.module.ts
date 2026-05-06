@@ -6,7 +6,7 @@ import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     BullModule.registerQueue({
-      name: 'sql-jobs',
+      name: 'sql-evaluation',
     }),
   ],
   controllers: [SubmissionsController],

@@ -1,6 +1,6 @@
 # Contrato de Cola: SQL Evaluation (`sql-evaluation`)
 
-Este documento define la estructura y el comportamiento esperado para la comunicación asíncrona a través de Redis utilizando BullMQ entre la API Productora y el Worker Consumidor.
+Este documento define la estructura y el comportamiento esperado para la comunicación asíncrona a través de Redis utilizando Bull entre la API Productora y el Worker Consumidor.
 
 ## 1. Definición del Job
 - **Nombre de la cola:** `sql-evaluation`
@@ -49,4 +49,4 @@ A alto nivel (sin implementación detallada aún), el Worker se espera que:
 2. **Obtenga** el comportamiento deseado y esquema del reto (consultando la DB, o recibiendo el schemaId dentro del propio payload si se llegara a expandir).
 3. **Ejecute** en un entorno aislado la `sqlQuery` o verifique su AST.
 4. **Resuelva** el resultado en un booleano (Aprobado/Fallido) o en metadatos de cobertura.
-5. **Cierre** el trabajo en BullMQ. Puede comunicar el resultado de vuelta emitiendo a otra cola o actualizando directamente la base de datos (por ejemplo, cambiando el estado en la tabla `submissions`).
+5. **Cierre** el trabajo en Bull. Puede comunicar el resultado de vuelta emitiendo a otra cola o actualizando directamente la base de datos (por ejemplo, cambiando el estado en la tabla `submissions`).
