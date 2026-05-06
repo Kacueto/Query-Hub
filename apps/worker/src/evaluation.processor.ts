@@ -1,24 +1,16 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
+import { Process, Processor } from '@nestjs/bull';
+import { Job } from 'bull';
 
-@Processor('sql-evaluation')
-export class EvaluationProcessor extends WorkerHost {
-  private readonly logger = new Logger(EvaluationProcessor.name);
+@Processor('sql-jobs')
+export class EvaluationProcessor {
 
-  async process(job: Job): Promise<unknown> {
-    this.logger.log(`Processing job ${job.id} — submission: ${job.data.submissionId}`);
+  @Process('execute-sql')
+  async handle(job: Job) {
+    console.log('Job recibido:', job.data);
 
-    // Stub: aquí irá la lógica real de evaluación SQL en entregas futuras
-    const result = {
-      submissionId: job.data.submissionId,
-      status: 'evaluated',
-      correct: true,
-      executionTimeMs: 42,
-      message: 'Worker stub: evaluation simulated successfully',
-    };
+    // Simulación
+    await new Promise(res => setTimeout(res, 2000));
 
-    this.logger.log(`Job ${job.id} completed`);
-    return result;
+    console.log('SQL ejecutado');
   }
 }
