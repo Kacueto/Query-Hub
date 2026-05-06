@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BullModule } from '@nestjs/bullmq';
+import { BullModule } from '@nestjs/bull';
 import { EvaluationProcessor } from './evaluation.processor';
 
 @Module({
@@ -10,14 +10,16 @@ import { EvaluationProcessor } from './evaluation.processor';
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        connection: {
+        redis: {
           host: config.get('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT'),
         },
       }),
     }),
 
-    BullModule.registerQueue({ name: 'sql-evaluation' }),
+    BullModule.registerQueue({
+      name: 'sql-jobs',
+    }),
   ],
   providers: [EvaluationProcessor],
 })
