@@ -90,7 +90,12 @@ export class PostgresChallengeRepository implements ChallengeRepository {
   }
 
   async update(challenge: Challenge): Promise<Challenge> {
-    await this.repo.update(challenge.id, {
+    const existing = await this.repo.findOne({ where: { id: challenge.id } });
+    if (!existing) {
+      throw new Error(`Challenge with id ${challenge.id} not found for update`);
+    }
+
+    const merged = this.repo.merge(existing, {
       title: challenge.title,
       description: challenge.description,
       difficulty: challenge.difficulty,
@@ -102,7 +107,9 @@ export class PostgresChallengeRepository implements ChallengeRepository {
       schemaSQL: challenge.schemaSQL,
       seedSQL: challenge.seedSQL,
     });
-    return this.findById(challenge.id);
+
+    const saved = await this.repo.save(merged);
+    return this.toDomain(saved);
   }
 
   async delete(id: number): Promise<void> {

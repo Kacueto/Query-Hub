@@ -1,6 +1,7 @@
 import { IsEnum, IsInt, IsOptional, IsString } from "class-validator";
 import { Transform } from "class-transformer";
 import { ChallengeStatus } from "../../domain/enums/challenge-status.enum";
+import { ChallengeDifficulty } from "../../domain/enums/challenge-difficulty.enum";
 
 export class QueryChallengesDto {
   @IsOptional()
@@ -13,8 +14,8 @@ export class QueryChallengesDto {
   status?: ChallengeStatus;
 
   @IsOptional()
-  @IsString()
-  difficulty?: string;
+  @IsEnum(ChallengeDifficulty)
+  difficulty?: ChallengeDifficulty;
 
   @IsOptional()
   @IsString()

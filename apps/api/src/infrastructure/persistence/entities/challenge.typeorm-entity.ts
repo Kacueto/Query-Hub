@@ -62,11 +62,11 @@ export class ChallengeTypeormEntity {
   @JoinColumn({ name: "created_by" })
   createdByUser: UserTypeormEntity;
 
-  @Column({ type: "text", name: "schema_sql", nullable: true })
-  schemaSQL: string;
+  @Column({ type: "text", name: "schema_sql", nullable: true, default: "" })
+  schemaSQL: string | null;
 
-  @Column({ type: "text", name: "seed_sql", nullable: true })
-  seedSQL: string;
+  @Column({ type: "text", name: "seed_sql", nullable: true, default: "" })
+  seedSQL: string | null;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;

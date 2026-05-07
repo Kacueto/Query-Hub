@@ -1,5 +1,6 @@
 import { Challenge } from "../entities/challenge.entity";
 import { ChallengeStatus } from "../enums/challenge-status.enum";
+import { ChallengeDifficulty } from "../enums/challenge-difficulty.enum";
 
 export const CHALLENGE_REPOSITORY = Symbol("ChallengeRepository");
 
@@ -16,6 +17,6 @@ export interface ChallengeRepository {
 export interface ChallengeFilters {
   courseId?: number;
   status?: ChallengeStatus;
-  difficulty?: string;
+  difficulty?: ChallengeDifficulty;
   databaseEngine?: string;
 }
