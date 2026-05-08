@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   OneToOne,
   JoinColumn,
@@ -44,11 +45,8 @@ export class SubmissionTypeormEntity {
   @JoinColumn({ name: "evaluation_id" })
   evaluation: EvaluationTypeormEntity | null;
 
-  @Column({ type: "varchar" })
-  engine: string;
-
-  @Column({ type: "text", name: "query_sql" })
-  querySql: string;
+  @Column({ type: "text" })
+  code: string;
 
   @Column({
     type: "enum",
@@ -57,8 +55,23 @@ export class SubmissionTypeormEntity {
   })
   status: SubmissionStatus;
 
+  @Column({ type: "int", nullable: true, name: "execution_time_ms" })
+  executionTimeMs: number | null;
+
+  @Column({ type: "int", nullable: true })
+  score: number | null;
+
+  @Column({ type: "text", nullable: true })
+  result: string | null;
+
+  @Column({ type: "text", nullable: true })
+  feedback: string | null;
+
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
+
+  @UpdateDateColumn({ name: "updated_at" })
+  updatedAt: Date;
 
   @OneToOne(
     () => AssessmentTypeormEntity,

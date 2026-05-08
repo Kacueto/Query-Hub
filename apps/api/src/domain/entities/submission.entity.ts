@@ -5,11 +5,13 @@ export class Submission {
     public readonly id: number,
     public readonly studentId: number,
     public readonly challengeId: number,
-    public readonly evaluationId: number | null, // nullable: puede ser fuera de evaluación
-    public readonly engine: string,
-    public readonly querySql: string,
+    public readonly code: string,
     public readonly status: SubmissionStatus,
     public readonly createdAt: Date,
+    public readonly executionTimeMs?: number | null,
+    public readonly score?: number | null,
+    public readonly result?: string | null,
+    public readonly feedback?: string | null,
   ) {}
 
   isPending(): boolean {
