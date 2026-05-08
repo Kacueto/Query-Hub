@@ -48,3 +48,6 @@ coverage/
 .serverless/
 .firebase/
 .history/
+
+#claude
+CLAUDE.md

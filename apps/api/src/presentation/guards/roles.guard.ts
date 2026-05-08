@@ -13,14 +13,9 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    if (!requiredRoles) {
-      return true;
-    }
+    if (!requiredRoles) return true;
 
-    // TODO: integrate with AuthGuard when ready — currently allows all requests
-    console.warn(
-      `[RolesGuard] Roles required: ${requiredRoles.join(", ")} — stub allows access until Auth integration`,
-    );
-    return true;
+    const { user } = context.switchToHttp().getRequest();
+    return requiredRoles.includes(user?.role);
   }
 }
