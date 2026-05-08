@@ -394,7 +394,7 @@ JWT_SECRET=change_this_secret
 
 ---
 
-## Contacto / Preguntas
+## Revisar
 
 Si algo no funciona:
 1. Revisa los logs con `docker compose logs`
@@ -403,6 +403,3 @@ Si algo no funciona:
 4. Intenta `docker compose down` y `docker compose up --build` para limpiar
 
 ---
-
-**Última actualización**: Mayo 7, 2026  
-**Estado**: Entrega Parcial 1 en progreso
