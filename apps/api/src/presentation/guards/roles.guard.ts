@@ -8,19 +8,19 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
-    if (!requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
-    // TODO: integrate with AuthGuard when ready — currently allows all requests
-    console.warn(
-      `[RolesGuard] Roles required: ${requiredRoles.join(", ")} — stub allows access until Auth integration`,
-    );
-    return true;
+    const { user } = context.switchToHttp().getRequest();
+
+    if (!user) return false;
+
+    return requiredRoles.includes(user.role as Role);
   }
 }
