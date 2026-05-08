@@ -31,23 +31,17 @@ export class UsersController {
   ) {}
 
   @Post()
-<<<<<<< HEAD
   @Roles(Role.ADMIN)
-=======
   @ApiOperation({ summary: "Registrar un nuevo usuario" })
   @ApiResponse({ status: 201, description: "Usuario creado exitosamente" })
->>>>>>> 5517b6c42f780b3c4afa5c5e9d5d261f356336dd
   create(@Body() dto: CreateUserDto) {
     return this.createUser.execute(dto);
   }
 
   @Get()
-<<<<<<< HEAD
   @Roles(Role.ADMIN)
-=======
   @ApiOperation({ summary: "Listar todos los usuarios" })
   @ApiResponse({ status: 200, description: "Lista de usuarios" })
->>>>>>> 5517b6c42f780b3c4afa5c5e9d5d261f356336dd
   findAll() {
     return this.getAllUsers.execute();
   }
@@ -62,13 +56,10 @@ export class UsersController {
   }
 
   @Delete(":id")
-<<<<<<< HEAD
   @Roles(Role.ADMIN)
-=======
   @ApiOperation({ summary: "Eliminar un usuario" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Usuario eliminado" })
->>>>>>> 5517b6c42f780b3c4afa5c5e9d5d261f356336dd
   remove(@Param("id", ParseIntPipe) id: number) {
     return this.deleteUser.execute(id);
   }
