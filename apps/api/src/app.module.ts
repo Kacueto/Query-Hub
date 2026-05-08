@@ -6,6 +6,8 @@ import { BullModule } from '@nestjs/bull';
 import { AuthModule } from './presentation/modules/auth/auth.module';
 import { SubmissionsModule } from './submissions/submissions.module';
 import { ChallengesModule } from './presentation/modules/challenges/challenges.module';
+import { CoursesModule } from './presentation/modules/courses/courses.module';
+import { UsersModule } from './presentation/modules/users/users.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { ChallengesModule } from './presentation/modules/challenges/challenges.m
     AuthModule,
     SubmissionsModule,
     ChallengesModule,
+    CoursesModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
