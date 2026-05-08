@@ -1,17 +1,20 @@
 import { ChallengeStatus } from "../enums/challenge-status.enum";
+import { ChallengeDifficulty } from "../enums/challenge-difficulty.enum";
 
 export class Challenge {
   constructor(
     public readonly id: number,
     public readonly title: string,
     public readonly description: string,
-    public readonly difficulty: string,
+    public readonly difficulty: ChallengeDifficulty,
     public readonly tags: string[],
     public readonly databaseEngine: string,
     public readonly timeLimitMs: number,
     public readonly status: ChallengeStatus,
     public readonly courseId: number,
     public readonly createdBy: number,
+    public readonly schemaSQL: string,
+    public readonly seedSQL: string,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {}
