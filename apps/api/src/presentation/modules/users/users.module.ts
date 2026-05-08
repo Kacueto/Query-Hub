@@ -8,17 +8,19 @@ import { GetAllUsersUseCase } from "../../../application/use-cases/users/get-all
 import { GetUserByIdUseCase } from "../../../application/use-cases/users/get-user-by-id.use-case";
 import { DeleteUserUseCase } from "../../../application/use-cases/users/delete-user.use-case";
 import { UsersController } from "../../http/controllers/users.controller";
+import { RolesGuard } from "../../guards/roles.guard";
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserTypeormEntity])],
   providers: [
     { provide: USER_REPOSITORY, useClass: PostgresUserRepository },
+    RolesGuard,
     CreateUserUseCase,
     GetAllUsersUseCase,
     GetUserByIdUseCase,
     DeleteUserUseCase,
   ],
   controllers: [UsersController],
-  exports: [USER_REPOSITORY], // lo exporta para que AuthModule pueda usarlo
+  exports: [USER_REPOSITORY],
 })
 export class UsersModule {}
