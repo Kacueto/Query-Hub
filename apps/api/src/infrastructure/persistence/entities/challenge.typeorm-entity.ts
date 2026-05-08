@@ -10,6 +10,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { ChallengeStatus } from "../../../domain/enums/challenge-status.enum";
+import { ChallengeDifficulty } from "../../../domain/enums/challenge-difficulty.enum";
 import { CourseTypeormEntity } from "./course.typeorm-entity";
 import { UserTypeormEntity } from "./user.typeorm-entity";
 import { SchemaTypeormEntity } from "./schema.typeorm-entity";
@@ -28,8 +29,8 @@ export class ChallengeTypeormEntity {
   @Column({ type: "text" })
   description: string;
 
-  @Column({ type: "varchar" })
-  difficulty: string;
+  @Column({ type: "enum", enum: ChallengeDifficulty })
+  difficulty: ChallengeDifficulty;
 
   @Column({ type: "json" })
   tags: string[];
@@ -60,6 +61,12 @@ export class ChallengeTypeormEntity {
   @ManyToOne(() => UserTypeormEntity, (user) => user.challenges)
   @JoinColumn({ name: "created_by" })
   createdByUser: UserTypeormEntity;
+
+  @Column({ type: "text", name: "schema_sql", nullable: true, default: "" })
+  schemaSQL: string | null;
+
+  @Column({ type: "text", name: "seed_sql", nullable: true, default: "" })
+  seedSQL: string | null;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
