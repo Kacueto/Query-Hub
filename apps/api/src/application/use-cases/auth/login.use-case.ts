@@ -1,10 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-
-import { UserRepository, USER_REPOSITORY } from '../../../domain/repositories/user.repository';
-import { LoginDto } from '../../dtos/login.dto';
-import { Role } from '../../../domain/enums/role.enum';
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { USER_REPOSITORY, UserRepository } from "../../../domain/repositories/user.repository";
+import { JwtPayload } from "../../../infrastructure/auth/jwt-payload.interface";
+import { LoginDto } from "../../dtos/login.dto";
 
 @Injectable()
 export class LoginUseCase {
@@ -16,25 +15,17 @@ export class LoginUseCase {
 
   async execute(dto: LoginDto): Promise<{ accessToken: string }> {
     const user = await this.userRepository.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException("Credenciales inválidas");
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+    const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!passwordMatch) throw new UnauthorizedException("Credenciales inválidas");
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const payload = {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Role,
+      role: user.role,
     };
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
+    return { accessToken: this.jwtService.sign(payload) };
   }
 }

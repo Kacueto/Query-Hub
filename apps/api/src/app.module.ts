@@ -2,10 +2,12 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { BullModule } from "@nestjs/bull";
-import { UsersModule } from "./presentation/modules/users/users.module";
+
 import { AuthModule } from "./presentation/modules/auth/auth.module";
 import { SubmissionsModule } from "./submissions/submissions.module";
 import { ChallengesModule } from "./presentation/modules/challenges/challenges.module";
+import { CoursesModule } from "./presentation/modules/courses/courses.module";
+import { UsersModule } from "./presentation/modules/users/users.module";
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { ChallengesModule } from "./presentation/modules/challenges/challenges.m
     AuthModule,
     SubmissionsModule,
     ChallengesModule,
+    CoursesModule,
     UsersModule,
   ],
 })

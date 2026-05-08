@@ -374,10 +374,10 @@ POSTGRES_DB=queryhub
 
 # Redis (sin cambios en local)
 REDIS_HOST=redis
-REDIS_PORT=puerto
+REDIS_PORT=6379
 
 # API
-PORT=puerto
+PORT=3000
 
 # JWT (cambiar en producción)
 JWT_SECRET=change_this_secret

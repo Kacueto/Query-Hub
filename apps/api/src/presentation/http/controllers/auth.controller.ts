@@ -1,14 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { LoginUseCase } from "../../../application/use-cases/auth/login.use-case";
+import { LoginDto } from "../../../application/dtos/login.dto";
 
-import { LoginDto } from '../../../application/dtos/login.dto';
-import { LoginUseCase } from '../../../application/use-cases/auth/login.use-case';
-
-@Controller('auth')
+@ApiTags("Auth")
+@Controller("auth")
 export class AuthController {
   constructor(private readonly loginUseCase: LoginUseCase) {}
 
-  @Post('login')
+  @Post("login")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Iniciar sesión y obtener token JWT" })
+  @ApiResponse({ status: 200, description: "Login exitoso, retorna accessToken" })
+  @ApiResponse({ status: 401, description: "Credenciales inválidas" })
   login(@Body() dto: LoginDto) {
     return this.loginUseCase.execute(dto);
   }
