@@ -8,7 +8,7 @@ import {
   ParseIntPipe,
   UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from "@nestjs/swagger";
 import { CreateUserUseCase } from "../../../application/use-cases/users/create-user.use-case";
 import { GetAllUsersUseCase } from "../../../application/use-cases/users/get-all-users.use-case";
 import { GetUserByIdUseCase } from "../../../application/use-cases/users/get-user-by-id.use-case";
@@ -20,6 +20,7 @@ import { Roles } from "../../decorators/roles.decorator";
 import { Role } from "../../../domain/enums/role.enum";
 
 @ApiTags("Users")
+@ApiBearerAuth()
 @Controller("users")
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
