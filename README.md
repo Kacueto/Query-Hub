@@ -4,25 +4,20 @@
 
 ---
 
-## Estado: Entrega Parcial 1
-
-### Lo que ya está LISTO
+## Estado actual
 
 - **Arquitectura**: estructura Clean Architecture con dominio, aplicación, infraestructura y presentación.
 - **Modelo de dominio**: entidades base (User, Course, Challenge, Submission, Schema, etc.) con repositorios.
 - **Autenticación JWT**: endpoint de login funcional con tokens JWT.
 - **Gestión de usuarios**: CRUD básico de usuarios, roles (ADMIN, PROFESSOR, STUDENT).
 - **Roles y guards**: decorador `@Roles()` y guard para verificar permisos en rutas protegidas.
+- **CRUD de cursos**: módulo, controlador, casos de uso y endpoints para administrar cursos.
+- **CRUD de retos SQL**: módulo, controlador y casos de uso para crear, leer, actualizar, publicar y eliminar retos.
+- **Carga de esquemas y datos**: endpoints para subir DDL de esquemas (`/schema`) y scripts de datos semilla (`/seed`) a los retos.
+- **Documentación inicial de la API**: Swagger está habilitado en `http://localhost:3000/api/docs`.
 - **Docker Compose**: API, PostgreSQL y Redis funcionando en contenedores.
 - **Worker SQL**: modo stub, espera trabajos desde la cola Redis.
 - **Documentación de arquitectura**: diseño C4 de componentes y contenedores.
-- **CRUD de retos SQL**: endpoints y casos de uso para crear, leer, actualizar, publicar y eliminar retos.
-- **Carga de esquemas y datos**: endpoints para subir DDL de esquemas (`/schema`) y scripts de datos semilla (`/seed`) a los retos.
-
-###  Lo que FALTA para completar la parcial 1
-
-- **CRUD de cursos**: módulo, controlador, casos de uso.
-- **Documentación de la API**: archivos en `1-documentation/api/` con especificación de endpoints (Swagger o escrita).
 
 ---
 
@@ -72,7 +67,7 @@ Query-Hub/
 | `domain/entities/` | Define qué es un usuario, curso, reto, etc. (sin depender de tecnología) |
 | `domain/repositories/` | Contrato que dice "necesito guardar/recuperar datos" (interface) |
 | `domain/enums/` | Tipos permitidos: `Role` (ADMIN, PROFESSOR, STUDENT), `ChallengeStatus` (DRAFT, PUBLISHED) |
-| `application/use-cases/` | Lógica: "crear usuario", "hacer login", "listar cursos" |
+| `application/use-cases/` | Lógica: "crear usuario", "hacer login", "listar cursos", "gestionar retos" |
 | `application/dtos/` | Formato de datos que entra y sale de la API |
 | `infrastructure/persistence/` | Implementación real: cómo guardar en PostgreSQL (TypeORM) |
 | `infrastructure/auth/` | JWT: estrategia, token, verificación |
@@ -131,6 +126,23 @@ Query-Hub/
 - `get-all-users.use-case.ts` — Lista todos los usuarios
 - `delete-user.use-case.ts` — Busca usuario y lo elimina de la DB
 
+**`application/use-cases/courses/`** — Casos de uso de cursos:
+- `create-course.use-case.ts` — Crea un curso nuevo
+- `get-course-by-id.use-case.ts` — Busca un curso por ID
+- `get-all-courses.use-case.ts` — Lista todos los cursos
+- `update-course.use-case.ts` — Actualiza un curso existente
+- `delete-course.use-case.ts` — Elimina un curso
+
+**`application/use-cases/challenges/`** — Casos de uso de retos:
+- `create-challenge.use-case.ts` — Crea un reto SQL asociado a un curso
+- `get-challenge-by-id.use-case.ts` — Busca un reto por ID
+- `get-all-challenges.use-case.ts` — Lista retos con filtros
+- `update-challenge.use-case.ts` — Actualiza un reto existente
+- `publish-challenge.use-case.ts` — Publica un reto para hacerlo visible a estudiantes
+- `delete-challenge.use-case.ts` — Elimina un reto
+- `update-challenge-schema.use-case.ts` — Actualiza el esquema SQL del reto
+- `update-challenge-seed.use-case.ts` — Actualiza los datos semilla del reto
+
 ---
 
 #### **Infrastructure** — Detalles técnicos (base de datos, JWT, etc.)
@@ -159,6 +171,8 @@ Query-Hub/
 **`presentation/http/controllers/`** — Endpoints REST:
 - `auth.controller.ts` — Endpoint `POST /auth/login` para obtener token
 - `users.controller.ts` — Endpoints: `POST /users`, `GET /users`, `GET /users/:id`, `DELETE /users/:id`
+- `courses.controller.ts` — Endpoints CRUD para cursos
+- `challenges.controller.ts` — Endpoints CRUD y acciones de publicación para retos
 
 **`presentation/http/dto/`** — DTOs específicas de HTTP (si hay conversiones especiales)
 
@@ -170,7 +184,10 @@ Query-Hub/
 
 **`presentation/modules/`** — Módulos NestJS (agrupan funcionalidad):
 - `auth/auth.module.ts` — Agrupa login, JWT strategy, JWT guard
+- `courses/courses.module.ts` — Agrupa cursos, casos de uso y repositorio
+- `challenges/challenges.module.ts` — Agrupa retos, casos de uso y repositorio
 - `users/users.module.ts` — Agrupa usuarios, casos de uso, repositorio
+- `submissions/submissions.module.ts` — Agrupa el flujo de envíos y evaluación
 
 **`app.module.ts`** — Módulo raíz que importa: `AuthModule`, `UsersModule`, `SubmissionsModule`, etc.
 
@@ -336,29 +353,18 @@ docker compose logs -f postgres
 
 ---
 
-## Para completar la entrega parcial
+## Para cerrar la entrega
 
-1. **CRUD de Cursos**
-   - Crear módulo `CoursesModule`
-   - Implementar casos de uso (crear, listar, actualizar, eliminar)
-   - Endpoints: `POST/GET/PATCH/DELETE /courses`
-
-2. **CRUD de Retos SQL**
-   - Crear módulo `ChallengesModule`
-   - Implementar casos de uso (crear, listar, publicar, etc.)
-   - Endpoints: `POST/GET/PATCH/DELETE /challenges`
-
-3. **Carga de esquemas**
-   - Endpoint para cargar esquema SQL en un reto
-   - Endpoint: `POST /challenges/{id}/schema`
-
-4. **Generación de datos de prueba**
-   - Endpoint para generar datos iniciales
-   - Endpoint: `POST /challenges/{id}/seed`
-
-5. **Documentación API**
+1. **Documentación API**
    - Crear archivos markdown en `1-documentation/api/`
    - Documentar todos los endpoints con ejemplos
+
+2. **Evaluación SQL real**
+   - Sustituir el stub del worker por ejecución de consultas contra el entorno controlado
+   - Registrar resultados, errores y tiempos de evaluación
+
+3. **Flujo completo de submissions**
+   - Cerrar la integración entre API, cola Redis y worker para la evaluación end-to-end
 
 ---
 
