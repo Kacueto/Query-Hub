@@ -7,6 +7,6 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN rm -rf dist && rm -f *.tsbuildinfo && npm run build
 
 CMD ["node", "dist/main.js"]
