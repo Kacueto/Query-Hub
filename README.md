@@ -16,14 +16,13 @@
 - **Docker Compose**: API, PostgreSQL y Redis funcionando en contenedores.
 - **Worker SQL**: modo stub, espera trabajos desde la cola Redis.
 - **Documentación de arquitectura**: diseño C4 de componentes y contenedores.
+- **CRUD de retos SQL**: endpoints y casos de uso para crear, leer, actualizar, publicar y eliminar retos.
+- **Carga de esquemas y datos**: endpoints para subir DDL de esquemas (`/schema`) y scripts de datos semilla (`/seed`) a los retos.
 
 ###  Lo que FALTA para completar la parcial 1
 
 - **CRUD de cursos**: módulo, controlador, casos de uso.
-- **CRUD de retos SQL**: módulo, controlador, casos de uso (challenges).
-- **Carga de esquemas**: funcionalidad para subir esquemas a retos.
-- **Generación de datos de prueba**: funcionalidad para generar datos iniciales en un reto.
-- **Documentación de la API**: archivos en `1-documentation/api/` con especificación de endpoints.
+- **Documentación de la API**: archivos en `1-documentation/api/` con especificación de endpoints (Swagger o escrita).
 
 ---
 
