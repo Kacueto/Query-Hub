@@ -4,9 +4,9 @@
 
 ---
 
-## Estado: Entrega Parcial 1 — Semana 2
+## Estado: Entrega Parcial 1
 
-### ✅ Lo que ya está LISTO
+### Lo que ya está LISTO
 
 - **Arquitectura**: estructura Clean Architecture con dominio, aplicación, infraestructura y presentación.
 - **Modelo de dominio**: entidades base (User, Course, Challenge, Submission, Schema, etc.) con repositorios.
@@ -17,7 +17,7 @@
 - **Worker SQL**: modo stub, espera trabajos desde la cola Redis.
 - **Documentación de arquitectura**: diseño C4 de componentes y contenedores.
 
-### ❌ Lo que FALTA para completar la parcial 1
+###  Lo que FALTA para completar la parcial 1
 
 - **CRUD de cursos**: módulo, controlador, casos de uso.
 - **CRUD de retos SQL**: módulo, controlador, casos de uso (challenges).
@@ -180,7 +180,7 @@ docker compose logs -f postgres
 
 ---
 
-## Próximos pasos para completar la entrega parcial 1
+## Para completar la entrega parcial
 
 1. **CRUD de Cursos**
    - Crear módulo `CoursesModule`
@@ -213,15 +213,15 @@ Copia `.env.example` a `infra/.env` y ajusta si es necesario:
 ```env
 # PostgreSQL
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=changeme
+POSTGRES_PASSWORD=#changeme
 POSTGRES_DB=queryhub
 
 # Redis (sin cambios en local)
 REDIS_HOST=redis
-REDIS_PORT=6379
+REDIS_PORT=puerto
 
 # API
-PORT=3000
+PORT=puerto
 
 # JWT (cambiar en producción)
 JWT_SECRET=change_this_secret
