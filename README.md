@@ -408,3 +408,4 @@ Si algo no funciona:
 4. Intenta `docker compose down` y `docker compose up --build` para limpiar
 
 ---
+
