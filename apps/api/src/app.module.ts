@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 
+import { AuthModule } from './presentation/modules/auth/auth.module';
 import { SubmissionsModule } from './submissions/submissions.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
       }),
     }),
 
+    AuthModule,
     SubmissionsModule,
   ],
 })
