@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from "@nestjs/swagger";
 import { CreateUserUseCase } from "../../../application/use-cases/users/create-user.use-case";
@@ -13,9 +14,14 @@ import { GetAllUsersUseCase } from "../../../application/use-cases/users/get-all
 import { GetUserByIdUseCase } from "../../../application/use-cases/users/get-user-by-id.use-case";
 import { DeleteUserUseCase } from "../../../application/use-cases/users/delete-user.use-case";
 import { CreateUserDto } from "../../../application/dtos/create-user.dto";
+import { JwtAuthGuard } from "../../../infrastructure/auth/jwt-auth.guard";
+import { RolesGuard } from "../../guards/roles.guard";
+import { Roles } from "../../decorators/roles.decorator";
+import { Role } from "../../../domain/enums/role.enum";
 
 @ApiTags("Users")
 @Controller("users")
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(
     private readonly createUser: CreateUserUseCase,
@@ -25,6 +31,7 @@ export class UsersController {
   ) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: "Registrar un nuevo usuario" })
   @ApiResponse({ status: 201, description: "Usuario creado exitosamente" })
   create(@Body() dto: CreateUserDto) {
@@ -32,6 +39,7 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: "Listar todos los usuarios" })
   @ApiResponse({ status: 200, description: "Lista de usuarios" })
   findAll() {
@@ -48,6 +56,7 @@ export class UsersController {
   }
 
   @Delete(":id")
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: "Eliminar un usuario" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Usuario eliminado" })

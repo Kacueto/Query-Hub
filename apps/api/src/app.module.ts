@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bull';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { BullModule } from "@nestjs/bull";
 
-import { AuthModule } from './presentation/modules/auth/auth.module';
-import { SubmissionsModule } from './submissions/submissions.module';
-import { ChallengesModule } from './presentation/modules/challenges/challenges.module';
-import { CoursesModule } from './presentation/modules/courses/courses.module';
-import { UsersModule } from './presentation/modules/users/users.module';
+import { AuthModule } from "./presentation/modules/auth/auth.module";
+import { SubmissionsModule } from "./submissions/submissions.module";
+import { ChallengesModule } from "./presentation/modules/challenges/challenges.module";
+import { CoursesModule } from "./presentation/modules/courses/courses.module";
+import { UsersModule } from "./presentation/modules/users/users.module";
 
 @Module({
   imports: [
@@ -18,17 +18,17 @@ import { UsersModule } from './presentation/modules/users/users.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
+        type: "postgres",
 
-        host: config.get<string>('POSTGRES_HOST'),
+        host: config.get<string>("POSTGRES_HOST"),
 
-        port: config.get<number>('POSTGRES_PORT'),
+        port: config.get<number>("POSTGRES_PORT"),
 
-        username: config.get<string>('POSTGRES_USER'),
+        username: config.get<string>("POSTGRES_USER"),
 
-        password: config.get<string>('POSTGRES_PASSWORD'),
+        password: config.get<string>("POSTGRES_PASSWORD"),
 
-        database: config.get<string>('POSTGRES_DB'),
+        database: config.get<string>("POSTGRES_DB"),
 
         autoLoadEntities: true,
 
@@ -40,9 +40,9 @@ import { UsersModule } from './presentation/modules/users/users.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         redis: {
-          host: config.get<string>('REDIS_HOST'),
+          host: config.get<string>("REDIS_HOST"),
 
-          port: config.get<number>('REDIS_PORT'),
+          port: config.get<number>("REDIS_PORT"),
         },
       }),
     }),
