@@ -5,7 +5,8 @@
     "build": "nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch"
+    "start:debug": "nest start --debug --watch",
+    "seed": "npx ts-node -r tsconfig-paths/register src/seed/index.ts"
   },
   "dependencies": {
     "@nestjs/bull": "^11.0.4",
@@ -34,6 +35,8 @@
     "@types/bcrypt": "^5.0.0",
     "@types/node": "^20.0.0",
     "@types/passport-jwt": "^4.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.0"
   }
 }
