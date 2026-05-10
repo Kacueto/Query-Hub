@@ -47,6 +47,9 @@ export class CoursesController {
   @UseGuards(RolesGuard)
   @ApiOperation({ summary: "Crear un nuevo curso (solo PROFESSOR)" })
   @ApiResponse({ status: 201, description: "Curso creado exitosamente" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   create(@Body() dto: CreateCourseDto) {
     return this.createCourse.execute(dto);
   }
@@ -54,6 +57,7 @@ export class CoursesController {
   @Get()
   @ApiOperation({ summary: "Listar cursos. STUDENT ve solo los suyos; PROFESSOR/ADMIN ve todos" })
   @ApiResponse({ status: 200, description: "Lista de cursos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
   findAll(@Request() req) {
     const user = req.user;
     if (user.role === Role.STUDENT) {
@@ -68,6 +72,8 @@ export class CoursesController {
   @ApiOperation({ summary: "Obtener un curso por ID (solo PROFESSOR o ADMIN)" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Curso encontrado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
   @ApiResponse({ status: 403, description: "Acceso denegado" })
   @ApiResponse({ status: 404, description: "Curso no encontrado" })
   findOne(@Param("id", ParseIntPipe) id: number) {
@@ -80,6 +86,9 @@ export class CoursesController {
   @ApiOperation({ summary: "Actualizar un curso (solo PROFESSOR)" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Curso actualizado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   @ApiResponse({ status: 404, description: "Curso no encontrado" })
   update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateCourseDto) {
     return this.updateCourse.execute(id, dto);
@@ -91,6 +100,9 @@ export class CoursesController {
   @ApiOperation({ summary: "Eliminar un curso (solo PROFESSOR)" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Curso eliminado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   @ApiResponse({ status: 404, description: "Curso no encontrado" })
   remove(@Param("id", ParseIntPipe) id: number) {
     return this.deleteCourse.execute(id);

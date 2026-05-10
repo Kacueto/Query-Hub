@@ -13,6 +13,7 @@ export class AuthController {
   @ApiOperation({ summary: "Iniciar sesión y obtener token JWT" })
   @ApiResponse({ status: 200, description: "Login exitoso, retorna accessToken" })
   @ApiResponse({ status: 401, description: "Credenciales inválidas" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
   login(@Body() dto: LoginDto) {
     return this.loginUseCase.execute(dto);
   }

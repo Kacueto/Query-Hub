@@ -14,7 +14,7 @@ import { GetAllUsersUseCase } from "../../../application/use-cases/users/get-all
 import { GetUserByIdUseCase } from "../../../application/use-cases/users/get-user-by-id.use-case";
 import { DeleteUserUseCase } from "../../../application/use-cases/users/delete-user.use-case";
 import { CreateUserDto } from "../../../application/dtos/create-user.dto";
-import { JwtAuthGuard } from "../../../infrastructure/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../../guards/jwt-auth.guard";
 import { RolesGuard } from "../../guards/roles.guard";
 import { Roles } from "../../decorators/roles.decorator";
 import { Role } from "../../../domain/enums/role.enum";
@@ -35,6 +35,9 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: "Registrar un nuevo usuario" })
   @ApiResponse({ status: 201, description: "Usuario creado exitosamente" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   create(@Body() dto: CreateUserDto) {
     return this.createUser.execute(dto);
   }
@@ -43,6 +46,8 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: "Listar todos los usuarios" })
   @ApiResponse({ status: 200, description: "Lista de usuarios" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   findAll() {
     return this.getAllUsers.execute();
   }
@@ -51,6 +56,8 @@ export class UsersController {
   @ApiOperation({ summary: "Obtener un usuario por ID" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Usuario encontrado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
   @ApiResponse({ status: 404, description: "Usuario no encontrado" })
   findOne(@Param("id", ParseIntPipe) id: number) {
     return this.getUserById.execute(id);
@@ -61,6 +68,10 @@ export class UsersController {
   @ApiOperation({ summary: "Eliminar un usuario" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Usuario eliminado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
+  @ApiResponse({ status: 409, description: "Conflicto: el usuario tiene recursos asociados (cursos, challenges, etc.)" })
   remove(@Param("id", ParseIntPipe) id: number) {
     return this.deleteUser.execute(id);
   }
