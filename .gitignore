@@ -49,5 +49,6 @@ coverage/
 .firebase/
 .history/
 
-#claude
-CLAUDE.md
+# AI rules (versioned on purpose)
+# CLAUDE.md is part of .ai/ and SHOULD be versioned
+# .ai/* is intentionally tracked
