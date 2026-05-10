@@ -49,6 +49,9 @@ export class ChallengesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: "Crear un nuevo reto SQL" })
   @ApiResponse({ status: 201, description: "Reto creado en estado DRAFT" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   create(@Body() dto: CreateChallengeDto) {
     return this.createChallenge.execute(dto);
   }
@@ -56,6 +59,7 @@ export class ChallengesController {
   @Get()
   @ApiOperation({ summary: "Listar retos con filtros opcionales" })
   @ApiResponse({ status: 200, description: "Lista de retos" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
   findAll(@Query() filters: QueryChallengesDto) {
     return this.getAllChallenges.execute(filters);
   }
@@ -64,6 +68,7 @@ export class ChallengesController {
   @ApiOperation({ summary: "Obtener un reto por ID" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Reto encontrado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
   @ApiResponse({ status: 404, description: "Reto no encontrado" })
   findOne(@Param("id", ParseIntPipe) id: number) {
     return this.getChallengeById.execute(id);
@@ -75,6 +80,9 @@ export class ChallengesController {
   @ApiOperation({ summary: "Actualizar datos de un reto" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Reto actualizado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   @ApiResponse({ status: 404, description: "Reto no encontrado" })
   update(
     @Param("id", ParseIntPipe) id: number,
@@ -89,6 +97,9 @@ export class ChallengesController {
   @ApiOperation({ summary: "Eliminar un reto" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Reto eliminado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   @ApiResponse({ status: 404, description: "Reto no encontrado" })
   remove(@Param("id", ParseIntPipe) id: number) {
     return this.deleteChallenge.execute(id);
@@ -100,6 +111,9 @@ export class ChallengesController {
   @ApiOperation({ summary: "Publicar un reto (cambia estado DRAFT → PUBLISHED)" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 200, description: "Reto publicado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   @ApiResponse({ status: 404, description: "Reto no encontrado" })
   publish(@Param("id", ParseIntPipe) id: number) {
     return this.publishChallenge.execute(id);
@@ -111,6 +125,9 @@ export class ChallengesController {
   @ApiOperation({ summary: "Actualizar el schema SQL del reto" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 201, description: "Schema actualizado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   updateSchema(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdateSchemaDto,
@@ -124,6 +141,9 @@ export class ChallengesController {
   @ApiOperation({ summary: "Actualizar el seed SQL del reto" })
   @ApiParam({ name: "id", type: Number })
   @ApiResponse({ status: 201, description: "Seed actualizado" })
+  @ApiResponse({ status: 400, description: "Datos de entrada inválidos" })
+  @ApiResponse({ status: 401, description: "Token inválido o no proporcionado" })
+  @ApiResponse({ status: 403, description: "No tiene permisos para realizar esta acción" })
   updateSeed(
     @Param("id", ParseIntPipe) id: number,
     @Body() dto: UpdateSeedDto,

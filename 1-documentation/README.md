@@ -99,7 +99,7 @@ Esta capa expresa las reglas del negocio sin depender de NestJS, Postgres o Redi
 ### 6.2 Application
 
 - Ubicación: `apps/api/src/application/`
-- Contiene casos de uso, DTOs internos y puertos de la aplicación.
+- Contiene casos de uso, DTOs internos y puertos de la aplicación (interfaces que la infraestructura implementa).
 - Ejemplos:
   - `CreateCourseUseCase`, `ListCoursesUseCase`.
   - `CreateChallengeUseCase`.
@@ -110,11 +110,10 @@ Esta capa expresa las reglas del negocio sin depender de NestJS, Postgres o Redi
 
 - Ubicación: `apps/api/src/infrastructure/`
 - Concentra detalles técnicos:
-  - `config/`: carga de variables de entorno, configuración de NestJS.
-  - `database/`: conexión a PostgreSQL.
-  - `persistence/`: implementaciones concretas de repositorios.
-  - `queue/`: integración con Redis/BullMQ.
-  - `security/`: JWT, estrategias y utilidades de seguridad.
+  - `config/`: carga de variables de entorno, configuración de NestJS y TypeORM.
+  - `auth/`: JWT strategy, token generation (`NestJwtTokenGeneratorService`).
+  - `persistence/`: implementaciones concretas de repositorios con TypeORM.
+  - `queue/`: integración con Redis/BullMQ (`BullSubmissionQueueAdapter`).
 
 Implementa los puertos definidos en las capas internas usando tecnologías concretas.
 
@@ -122,7 +121,7 @@ Implementa los puertos definidos en las capas internas usando tecnologías concr
 
 - Ubicación: `apps/api/src/presentation/`
 - Expone la API HTTP:
-  - `http/controllers/`: controladores NestJS por módulo (auth, users, courses, challenges, schemas, submissions).
+  - `http/controllers/`: controladores NestJS por módulo (auth, users, courses, challenges, submissions).
   - `http/dto/`: DTOs de entrada y salida.
   - `http/guards/`: guards de autenticación/autorización.
   - `modules/`: módulos NestJS por área funcional.
@@ -164,7 +163,7 @@ Componentes sugeridos para Query Hub:
 - Adaptadores de infraestructura
   - `PostgresPersistenceAdapter` (repositorios con PostgreSQL)
   - `QueuePublisher` (publicación en Redis/BullMQ)
-  - `JwtServiceAdapter` (emisión y validación JWT)
+  - `TokenGenerator` (emisión de JWT via `NestJwtTokenGeneratorService`)
 
 El diagrama debe mostrar controladores llamando a casos de uso, casos de uso usando repositorios y adaptadores, y estos a su vez comunicándose con Postgres, Redis y el servicio de JWT.
 
@@ -192,22 +191,22 @@ QUERY-HUB/
 │   │   │   │   └── use-cases/
 │   │   │   ├── infrastructure/
 │   │   │   │   ├── config/
-│   │   │   │   ├── database/
+│   │   │   │   ├── auth/
 │   │   │   │   ├── persistence/
-│   │   │   │   ├── queue/
-│   │   │   │   └── security/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   └── repositories/
+│   │   │   │   └── queue/
 │   │   │   ├── presentation/
 │   │   │   │   ├── http/
 │   │   │   │   │   ├── controllers/
-│   │   │   │   │   ├── dto/
 │   │   │   │   │   └── guards/
 │   │   │   │   └── modules/
 │   │   │   │       ├── auth/
 │   │   │   │       ├── users/
 │   │   │   │       ├── courses/
 │   │   │   │       ├── challenges/
-│   │   │   │       ├── schemas/
 │   │   │   │       └── submissions/
+│   │   │   ├── seed/
 │   │   │   ├── app.module.ts
 │   │   │   └── main.ts
 │   │   ├── test/

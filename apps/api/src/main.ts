@@ -12,9 +12,15 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Query Hub API')
-    .setDescription('Plataforma de evaluación automática de consultas SQL')
+    .setDescription('Plataforma de evaluación automática de consultas SQL. Permite a profesores crear retos SQL y a estudiantes enviar soluciones para evaluación automatizada.')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addServer('http://localhost:3000', 'Local development')
+    .addTag('Auth', 'Autenticación y gestión de tokens JWT')
+    .addTag('Users', 'Gestión de usuarios del sistema')
+    .addTag('Courses', 'Gestión de cursos académicos')
+    .addTag('Challenges', 'Retos SQL para evaluación de estudiantes')
+    .addTag('Submissions', 'Envío de soluciones SQL para evaluación')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);

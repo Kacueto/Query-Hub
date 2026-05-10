@@ -3,8 +3,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { BullModule } from "@nestjs/bull";
 
+import { createTypeOrmConfig } from "./infrastructure/config/database.config";
 import { AuthModule } from "./presentation/modules/auth/auth.module";
-import { SubmissionsModule } from "./submissions/submissions.module";
+import { SubmissionsModule } from "./presentation/modules/submissions/submissions.module";
 import { ChallengesModule } from "./presentation/modules/challenges/challenges.module";
 import { CoursesModule } from "./presentation/modules/courses/courses.module";
 import { UsersModule } from "./presentation/modules/users/users.module";
@@ -17,23 +18,7 @@ import { UsersModule } from "./presentation/modules/users/users.module";
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: "postgres",
-
-        host: config.get<string>("POSTGRES_HOST"),
-
-        port: config.get<number>("POSTGRES_PORT"),
-
-        username: config.get<string>("POSTGRES_USER"),
-
-        password: config.get<string>("POSTGRES_PASSWORD"),
-
-        database: config.get<string>("POSTGRES_DB"),
-
-        autoLoadEntities: true,
-
-        synchronize: true,
-      }),
+      useFactory: (config: ConfigService) => createTypeOrmConfig(config),
     }),
 
     BullModule.forRootAsync({
