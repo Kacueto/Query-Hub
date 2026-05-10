@@ -6,17 +6,19 @@
 
 ## Estado actual
 
-- **Arquitectura**: estructura Clean Architecture con dominio, aplicación, infraestructura y presentación.
+- **Arquitectura**: Clean Architecture con dominio, aplicación, infraestructura y presentación + puertos/adaptadores.
 - **Modelo de dominio**: entidades base (User, Course, Challenge, Submission, Schema, etc.) con repositorios.
-- **Autenticación JWT**: endpoint de login funcional con tokens JWT.
+- **Autenticación JWT**: endpoint de login funcional con `LoginUseCase` y `TokenGenerator` (desacoplado de NestJS).
 - **Gestión de usuarios**: CRUD básico de usuarios, roles (ADMIN, PROFESSOR, STUDENT).
 - **Roles y guards**: decorador `@Roles()` y guard para verificar permisos en rutas protegidas.
 - **CRUD de cursos**: módulo, controlador, casos de uso y endpoints para administrar cursos.
 - **CRUD de retos SQL**: módulo, controlador y casos de uso para crear, leer, actualizar, publicar y eliminar retos.
 - **Carga de esquemas y datos**: endpoints para subir DDL de esquemas (`/schema`) y scripts de datos semilla (`/seed`) a los retos.
-- **Documentación inicial de la API**: Swagger está habilitado en `http://localhost:3000/api/docs`.
+- **Envío de soluciones SQL**: endpoint `POST /api/submissions` protegido con JWT + roles STUDENT/PROFESSOR. `CreateSubmissionUseCase` persiste y encola evaluación asíncrona.
+- **Seed de datos**: script `npm run seed` que crea datos iniciales (admin, profesor, estudiantes, cursos, retos).
+- **Documentación inicial de la API**: Swagger habilitado en `http://localhost:3000/api/docs`.
 - **Docker Compose**: API, PostgreSQL y Redis funcionando en contenedores.
-- **Worker SQL**: modo stub, espera trabajos desde la cola Redis.
+- **Worker SQL**: modo stub, recibe trabajos desde la cola Redis (simula 2s de ejecución).
 - **Documentación de arquitectura**: diseño C4 de componentes y contenedores.
 
 ---
@@ -29,9 +31,10 @@ Query-Hub/
 │   ├── api/                    # API NestJS (puerta de entrada)
 │   │   ├── src/
 │   │   │   ├── domain/         # Entidades, enums, repositorios (reglas de negocio)
-│   │   │   ├── application/    # Casos de uso, DTOs (orquestación)
-│   │   │   ├── infrastructure/ # TypeORM, JWT, base de datos (detalles técnicos)
+│   │   │   ├── application/    # Casos de uso, DTOs, puertos (orquestación)
+│   │   │   ├── infrastructure/ # TypeORM, JWT, Redis, base de datos (detalles técnicos)
 │   │   │   ├── presentation/   # Controllers, guards, módulos NestJS (HTTP)
+│   │   │   ├── seed/           # Script de seed de datos iniciales
 │   │   │   ├── app.module.ts   # Módulo raíz
 │   │   │   └── main.ts         # Punto de entrada
 │   │   ├── Dockerfile
@@ -40,15 +43,15 @@ Query-Hub/
 │   └── worker/                 # Worker en segundo plano (procesa trabajos SQL)
 │       ├── src/
 │       │   ├── worker.module.ts
-│       │   ├── evaluation.processor.ts  # Procesa trabajos desde Redis
+│       │   ├── evaluation.processor.ts  # Procesa trabajos desde Redis (stub)
 │       │   └── main.ts
 │       ├── Dockerfile
 │       └── package.json
 │
 ├── infra/
-│   ├── docker-compose.yml      # Configuración de contenedores
+│   ├── docker-compose.yml      # Configuración de contenedores (postgres, redis, api, worker)
 │   ├── .env.example            # Variables de entorno
-│   └── postgres/init/          # Scripts de inicialización DB
+│   └── .env                    # Variables de entorno activas (gitignored)
 │
 ├── 1-documentation/
 │   ├── README.md               # Guía de arquitectura
@@ -70,10 +73,11 @@ Query-Hub/
 | `application/use-cases/` | Lógica: "crear usuario", "hacer login", "listar cursos", "gestionar retos" |
 | `application/dtos/` | Formato de datos que entra y sale de la API |
 | `infrastructure/persistence/` | Implementación real: cómo guardar en PostgreSQL (TypeORM) |
-| `infrastructure/auth/` | JWT: estrategia, token, verificación |
+| `application/ports/` | Interfaces que la capa de aplicación define y la infraestructura implementa (TokenGenerator, SubmissionQueue) |
+| `infrastructure/auth/` | JWT: estrategia, token, generación |
 | `presentation/http/controllers/` | Endpoints REST: POST, GET, DELETE |
 | `presentation/guards/` | Verificadores: ¿token válido? ¿rol permitido? |
-| `presentation/modules/` | Agrupación NestJS: `AuthModule`, `UsersModule`, `CoursesModule` (falta), etc. |
+| `presentation/modules/` | Agrupación NestJS: `AuthModule`, `UsersModule`, `CoursesModule`, `ChallengesModule`, `SubmissionsModule` |
 
 ---
 
@@ -156,11 +160,11 @@ Query-Hub/
 - Y otros... (evaluation, enrollment, assessment, etc.)
 
 **`infrastructure/persistence/repositories/`** — Implementación real con TypeORM:
-- `postgres-user.repository.ts` — Implementa `UserRepository` usando TypeORM y PostgreSQL
+- `postgres-user.repository.ts`, `postgres-course.repository.ts`, `postgres-challenge.repository.ts`, `postgres-submission.repository.ts`, `postgres-assessment.repository.ts` — Implementaciones concretas de cada repositorio de dominio con TypeORM y PostgreSQL
 
 **`infrastructure/auth/`** — Autenticación con JWT:
 - `jwt.strategy.ts` — Estrategia Passport para validar JWT en header `Authorization: Bearer <token>`
-- `jwt-auth.guard.ts` — Guard que valida que el token sea válido antes de acceder a rutas protegidas
+- (El guard `jwt-auth.guard` se movió a `presentation/guards/` — ver abajo)
 
 **`infrastructure/security/`** — Utilidades de seguridad (puede estar vacío, preparado para después)
 
@@ -173,6 +177,7 @@ Query-Hub/
 - `users.controller.ts` — Endpoints: `POST /users`, `GET /users`, `GET /users/:id`, `DELETE /users/:id`
 - `courses.controller.ts` — Endpoints CRUD para cursos
 - `challenges.controller.ts` — Endpoints CRUD y acciones de publicación para retos
+- `submissions.controller.ts` — Endpoint `POST /submissions` para enviar soluciones SQL y encolar evaluación
 
 **`presentation/http/dto/`** — DTOs específicas de HTTP (si hay conversiones especiales)
 
@@ -236,7 +241,7 @@ Query-Hub/
 2. `AuthController` llama a `LoginUseCase`
 3. `LoginUseCase` busca el user en DB vía `UserRepository`
 4. Valida contraseña con `bcrypt.compare()`
-5. Crea un JWT con `JwtService` (firmado con `JWT_SECRET`)
+5. `LoginUseCase` usa `TokenGenerator` (implementado por `NestJwtTokenGeneratorService`) para crear un JWT firmado con `JWT_SECRET`
 6. Devuelve `{ accessToken: "eyJhbGc..." }`
 7. Cliente guarda el token y lo manda en cada request: `Authorization: Bearer <token>`
 8. `JwtAuthGuard` intercepta, valida el token, y si es válido, permite acceso
@@ -246,13 +251,13 @@ Query-Hub/
 
 ## Flujo simplificado: un estudiante envía una solución SQL
 
-1. Estudiante hace `POST /api/submissions` con `{ challengeId: 1, code: "SELECT * FROM users" }`
-2. `SubmissionsController` recibe el request (AQUÍ FALTA IMPLEMENTACIÓN COMPLETA)
-3. Se crea un `Submission` en la DB con estado `PENDING`
-4. La API publica un job en la cola Redis: `{ submissionId: 1, code: "...", challengeId: 1 }`
-5. El `Worker` consume el job de la cola
-6. El `EvaluationProcessor` simula la ejecución SQL (AQUÍ FALTA REAL IMPLEMENTATION)
-7. Publica resultados de vuelta (detalles pending)
+1. Estudiante hace `POST /api/submissions` con `Authorization: Bearer <token>` y body `{ challengeId: 1, sql: "SELECT * FROM users" }`
+2. `JwtAuthGuard` valida el token JWT → 401 si no es válido
+3. `RolesGuard` verifica que el rol sea STUDENT o PROFESSOR → 403 si no corresponde
+4. `CreateSubmissionUseCase` registra la submission vía `PostgresSubmissionRepository` y la encola vía `BullSubmissionQueueAdapter`
+5. La API publica un job en la cola Redis (`sql-evaluation`): `{ submissionId, sql }`
+6. El `Worker` consume el job de la cola
+7. El `EvaluationProcessor` simula la ejecución SQL (2 segundos) — pendiente implementar evaluación real
 
 ---
 
@@ -280,7 +285,23 @@ Query-Hub/
    - Redis en `localhost:6379`
    - Worker escuchando en background
 
-3. **Listo**, los logs te mostrarán cuando esté funcionando.
+3. **Poblar datos iniciales**: El seed se ejecuta automáticamente al iniciar la API con Docker Compose. Si quieres ejecutarlo manualmente:
+   ```bash
+   cd apps/api
+   npm run seed
+   ```
+   Esto crea un admin, profesor, estudiantes, cursos y retos de prueba.
+
+   **Credenciales de usuarios de prueba:**
+
+   | Rol | Email | Contraseña |
+   |------|-------|-----------|
+   | ADMIN | `admin@queryhub.com` | `Admin123!` |
+   | PROFESSOR | `maria.garcia@universidad.edu` | `Prof1234!` |
+   | STUDENT | `carlos.lopez@universidad.edu` | `Estudiante1!` |
+   | STUDENT | `ana.martinez@universidad.edu` | `Estudiante1!` |
+
+4. **Listo**, los logs te mostrarán cuando esté funcionando. Swagger en `http://localhost:3000/api/docs`
 
 ### Opción 2: Correr localmente en desarrollo
 
@@ -308,63 +329,111 @@ Query-Hub/
 
 ---
 
+## Seed de datos iniciales
+
+El proyecto incluye un script que crea datos de prueba (idempotente — no duplica datos si se ejecuta varias veces):
+
+```bash
+cd apps/api
+npm run seed
+```
+
+### Datos creados por el seed
+
+| Tipo | Cantidad | Detalles |
+|------|----------|---------|
+| **Admin** | 1 | `admin@queryhub.com` / `admin123` |
+| **Profesor** | 1 | `maria.garcia@universidad.edu` / `Prof1234!` |
+| **Estudiantes** | 2 | `carlos.lopez@universidad.edu`, `ana.martinez@universidad.edu` / `Estudiante1!` |
+| **Cursos** | 2 | Bases de Datos I, SQL Avanzado |
+| **Inscripciones** | 3 | Carlos→ambos cursos, Ana→Bases de Datos I |
+| **Retos SQL** | 4 | SELECT básica (EASY), WHERE (EASY), JOIN (MEDIUM), Subconsultas (HARD) — todos PUBLICADOS con schema/seed SQL |
+
+> **Nota:** Los datos seed persisten en el volumen de PostgreSQL aunque reinicies los contenedores.
+
+## Endpoints de la API
+
+| Método | Ruta | Auth | Rol | Descripción |
+|--------|------|------|-----|-------------|
+| POST | `/api/auth/login` | ❌ | — | Iniciar sesión, recibe JWT |
+| POST | `/api/users` | ✅ | ADMIN | Crear usuario |
+| GET | `/api/users` | ✅ | ADMIN | Listar usuarios |
+| GET | `/api/users/:id` | ✅ | — | Obtener usuario por ID |
+| DELETE | `/api/users/:id` | ✅ | ADMIN | Eliminar usuario |
+| POST | `/api/courses` | ✅ | PROFESSOR | Crear curso |
+| GET | `/api/courses` | ✅ | — | Listar cursos |
+| GET | `/api/courses/:id` | ✅ | PROFESSOR/ADMIN | Obtener curso |
+| PATCH | `/api/courses/:id` | ✅ | PROFESSOR | Actualizar curso |
+| DELETE | `/api/courses/:id` | ✅ | PROFESSOR | Eliminar curso |
+| POST | `/api/challenges` | ✅ | PROFESSOR | Crear reto (estado DRAFT) |
+| GET | `/api/challenges` | ❌ | — | Listar retos (con filtros) |
+| GET | `/api/challenges/:id` | ❌ | — | Obtener reto por ID |
+| PATCH | `/api/challenges/:id` | ✅ | PROFESSOR | Actualizar reto |
+| DELETE | `/api/challenges/:id` | ✅ | PROFESSOR | Eliminar reto |
+| PATCH | `/api/challenges/:id/publish` | ✅ | PROFESSOR | Publicar reto (DRAFT→PUBLISHED) |
+| POST | `/api/challenges/:id/schema` | ✅ | PROFESSOR | Subir DDL del reto |
+| POST | `/api/challenges/:id/seed` | ✅ | PROFESSOR | Subir datos semilla del reto |
+| POST | `/api/submissions` | ✅ | STUDENT/PROFESSOR | Enviar solución SQL para evaluación |
+
 ## Cómo probar que funciona
 
-### 1. Crear un usuario
+### 1. Login con datos seed
 ```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "Juan",
-    "email": "juan@example.com",
-    "password": "123456",
-    "role": "PROFESSOR"
-  }'
-```
-
-### 2. Hacer login
-```bash
+# Login como ADMIN
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{
-    "email": "juan@example.com",
-    "password": "123456"
-  }'
-```
-Guardarás el `accessToken` que devuelve.
+  -d '{"email": "admin@queryhub.com", "password": "admin123"}'
 
-### 3. Listar usuarios (con token)
-```bash
-curl -X GET http://localhost:3000/api/users \
-  -H "Authorization: Bearer <TU_TOKEN_AQUI>"
+# Login como PROFESOR
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "maria.garcia@universidad.edu", "password": "Prof1234!"}'
 ```
 
-### 4. Ver logs
+Guarda el `accessToken` que devuelve.
+
+### 2. Obtener retos (sin auth — público)
 ```bash
-# Ver logs de API
+curl http://localhost:3000/api/challenges
+```
+
+### 3. Enviar solución SQL (como estudiante)
+```bash
+TOKEN="<token_de_estudiante>"  # carlos.lopez / Estudiante1!
+
+curl -X POST http://localhost:3000/api/submissions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"challengeId": 1, "sql": "SELECT * FROM estudiantes;"}'
+```
+
+### 4. Ver logs de los contenedores
+```bash
 docker compose logs -f api
-
-# Ver logs de worker
 docker compose logs -f worker
-
-# Ver logs de DB
 docker compose logs -f postgres
 ```
 
+### 5. Swagger UI
+Abrir `http://localhost:3000/api/docs` en el navegador.
+
 ---
 
-## Para cerrar la entrega
+## Próximos pasos
 
 1. **Documentación API**
    - Crear archivos markdown en `1-documentation/api/`
    - Documentar todos los endpoints con ejemplos
 
-2. **Evaluación SQL real**
+2. **Evaluación SQL real** (worker)
    - Sustituir el stub del worker por ejecución de consultas contra el entorno controlado
    - Registrar resultados, errores y tiempos de evaluación
+   - El worker necesita acceder a PostgreSQL para ejecutar las consultas de los estudiantes
 
 3. **Flujo completo de submissions**
-   - Cerrar la integración entre API, cola Redis y worker para la evaluación end-to-end
+   - Enriquecer el job de la cola con datos del reto (schema_sql, seed_sql) para que el worker pueda evaluar
+   - ✅ Submissions persistidas en PostgreSQL vía `PostgresSubmissionRepository`
+   - Devolver resultados de evaluación al estudiante
 
 ---
 
